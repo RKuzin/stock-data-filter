@@ -9,9 +9,10 @@ function callback() {
       var lines = contents.split('\n'); //разбиваем содержимое файла на строки
       j = 0;
       for (var line = 0; line < lines.length - 1; line++) { //последняя строка пустая
+		console.log(lines[line]);
         lineItems = lines[line].split('\t'); //разбиваем строки на значения разделенные табуляцией
         qty = parseFloat(lineItems[9]);
-        if ((lineItems[2].substring(0, 2) === 'FO') && (parseFloat(lineItems[8]) >= 1)) { //фильтр по группе товаров и количеству (>0)
+        if ((lineItems[2].substring(0, 2) === 'FO') && (parseFloat(lineItems[9]) >= 1)) { //фильтр по группе товаров и количеству (>0)
 			console.log(lineItems[4]);
           if ((lineItems[4] !== 'Вт') && (lineItems[4] !== 'Бр')) { //отфильтровываем склады Брак и Витрина
             if (lineItems[0].length != 6) { //отфильтровываем 6-ти значные номера 
@@ -24,7 +25,12 @@ function callback() {
 			  else {
                 partNumber[j] = lineItems[0];
               }
-              quantity[j] = parseFloat(lineItems[8]); // округляем кол-во до целых
+              quantity[j] = parseFloat(lineItems[9]); // округляем кол-во до целых
+			  if (partNumber[j] == partNumber[j-1] ){ //проверка на задвоение номеров
+				  console.log('задвоение:',partNumber[j]);
+				  quantity[j-1]=quantity[j-1]+quantity[j] // суммируем кол-во задвоеных номеров
+				  j--;
+			  }
               j++;
             }
           }
@@ -46,7 +52,7 @@ function callback() {
     reader.onerror = function(event) {
       console.error("Файл не может быть прочитан! код " + event.target.error.code);
     };
-    reader.readAsText(file, 'windows-1251'); //важно указать правильную кодировку обрабатываемого файла
+    reader.readAsText(file, 'Windows-1251'); //важно указать правильную кодировку обрабатываемого файла
   }
 }
 
@@ -54,10 +60,10 @@ function init() {
   importButton = document.querySelector(".import-button");
   fileControl = document.querySelector(".stock-file");
   if (importButton.addEventListener) {
-    importButton.addEventListener("click", callback, false); //для современных браузеров
+    importButton.addEventListener("click", callback, false); //Modern browsers
   }
   else if (importButton.attachEvent) {
-    importButton.attachEvent('onclick', callback); //для старого IE
+    importButton.attachEvent('onclick', callback); //Old IE
   }
 }
 document.addEventListener("DOMContentLoaded", function() {
